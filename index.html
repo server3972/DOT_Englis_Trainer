@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0c1727">
-<title>DOT English Trainer — Android v2.1 · navegación mejorada</title>
+<title>DOT English Trainer — v2.2 · selección de voz</title>
 <style>
 :root { color-scheme:dark; --bg:#081322; --panel:#122237; --panel2:#182c45; --line:#2d425a; --teal:#5bddc4; --light:#f2f6fd; --muted:#b6c9de; --gold:#f2c879; --green:#90e0b4; }
 * {box-sizing:border-box}
@@ -54,6 +54,9 @@ summary {cursor:pointer; font-weight:800; font-size:17px; padding:4px 0; min-hei
 #navHint {padding:10px 12px;border:1px solid #395b6e;background:#112b3e;border-radius:10px;font-size:13px;color:#cfebf7;margin-top:10px}
 #resume:disabled {opacity:.45}
 .offline {color:var(--green);font-size:12px;font-weight:700}
+.voicepick {margin:13px 0 18px; padding:10px 13px 12px; border:1px solid #38576d; background:#10283e; border-radius:12px}
+.voicepick label {margin-top:0}
+.voicepick #voiceInfo {margin:7px 0 0}
 #micStatus {margin:5px 0 13px; padding:10px 12px; border:1px solid #3d536a; background:#132a40; border-radius:10px; font-size:13px; color:var(--muted)}
 #micStatus[data-mode="live"] {color:var(--green); border-color:#2c826e; background:#11382f}
 #micStatus[data-mode="error"] {color:#ffcc9d; border-color:#83563b}
@@ -66,7 +69,7 @@ button.listening {background:#8e3030; border-color:#b45c5c; color:#fff}
 <main class="wrap">
 <header>
 <div class="emblem" aria-hidden="true">DOT</div>
-<div><h1>English Trainer</h1><div class="subtitle">Inglés para operadores de tractocamión · v2.1 Android · micrófono y regresar a tu pregunta</div></div>
+<div><h1>English Trainer</h1><div class="subtitle">Inglés para operadores de tractocamión · v2.2 · Android y Mac · elegir voz · micrófono · preguntas en orden</div></div>
 </header>
 <section class="panel">
 <div class="meta"><span id="stats" aria-live="polite">51 preguntas para practicar</span><span class="pill">EN / ES</span></div>
@@ -80,6 +83,13 @@ button.listening {background:#8e3030; border-color:#b45c5c; color:#fff}
 <div class="buttonrow">
 <button type="button" id="listen" class="primary">▶ Escuchar pregunta</button>
 <button type="button" id="slow">◀ Voz lenta</button>
+</div>
+<div class="voicepick">
+<label for="englishVoice">Voz del oficial (elige una voz en inglés)</label>
+<select id="englishVoice" aria-describedby="voiceInfo">
+<option value="">Automática — inglés de Estados Unidos</option>
+</select>
+<p class="small" id="voiceInfo" aria-live="polite">Cargando voces de inglés disponibles en este dispositivo...</p>
 </div>
 <label for="typed">Escribe tu respuesta en inglés</label>
 <textarea id="typed" autocapitalize="sentences" spellcheck="false" placeholder="Ejemplo: Good morning, officer..."></textarea>
@@ -124,6 +134,7 @@ button.listening {background:#8e3030; border-color:#b45c5c; color:#fff}
 <details>
 <summary>Ayuda y progreso</summary>
 <p class="notice">Las 51 preguntas y traducciones funcionan sin internet una vez guardado este archivo. El reconocimiento por micrófono puede necesitar internet y permisos del navegador. Para escuchar, Android necesita una voz de inglés disponible en su motor de texto a voz; la primera vez quizá requiera descargarla. El guardado depende de que tu navegador permita almacenamiento local para archivos abiertos desde Descargas.</p>
+<p class="notice"><strong>Elegir voz:</strong> el selector «Voz del oficial» muestra las voces inglesas que tu navegador y sistema ofrecen; se elige independientemente en cada dispositivo. La opción «Voz lenta» mantiene la misma voz pero reduce su velocidad. Si solo hay una voz, revisa las voces de inglés disponibles en los ajustes de texto a voz de tu dispositivo.</p>
 <p class="notice"><strong>Micrófono en Samsung:</strong> abre Ajustes del teléfono → Aplicaciones → Chrome → Permisos → Micrófono → Permitir mientras se usa la aplicación. Después abre Chrome → ⋮ → Configuración → Configuración de sitios → Micrófono → permitir que los sitios soliciten acceso. Aunque ambos permisos estén activados, Chrome puede bloquear el reconocimiento automático si abriste el archivo <code>.html</code> desde Descargas. Para la función de voz automática, lo más fiable es publicar esta página en una dirección <code>https://</code> (por ejemplo, GitHub Pages). Alternativa inmediata: «Dictado del teclado» y micrófono de Samsung/Gboard, con idioma inglés.</p>
 <p class="notice"><strong>Navegación:</strong> «Ir a pregunta» te lleva directo a la pregunta por su número original (1–51). «Pregunta aleatoria» es un desvío temporal: «Siguiente» retoma la pregunta que tocaba estudiar; «Volver donde iba» regresa exactamente a la pregunta anterior al salto. El programa intenta recordar tu punto de estudio, pero el guardado local depende del navegador.</p>
 <p class="notice"><strong>Privacidad:</strong> El botón «Hablar en inglés» pide permiso para usar el micrófono. Según el navegador, el audio puede procesarse en un servicio externo. Esta página no guarda grabaciones de audio ni las envía por su cuenta. El texto reconocido se coloca en el cuadro de respuesta.</p>
@@ -226,6 +237,48 @@ function showAnswer() {
     $('tip').textContent='Consejo: '+q.tip;
   }
 }
+// El navegador puede entregar las voces después de cargar la página (voiceschanged).
+const VOICE_PREF_KEY = 'dot_english_trainer_selected_voice_v22';
+let voicePreference='';
+try { voicePreference=localStorage.getItem(VOICE_PREF_KEY)||''; } catch(e) { /* Memoria no disponible. */ }
+let englishVoices=[];
+function populateVoices(){
+  if(!('speechSynthesis' in window)) {
+    $('voiceInfo').textContent='Este navegador no permite escuchar las preguntas.';
+    $('englishVoice').disabled=true;
+    return;
+  }
+  const voices=window.speechSynthesis.getVoices();
+  englishVoices=voices.filter(v=>/^en(?:-|_|$)/i.test(v.lang||''));
+  englishVoices.sort((a,b)=>{
+    const priority=v=>/^en[-_]US$/i.test(v.lang)?0:1;
+    return priority(a)-priority(b) || a.name.localeCompare(b.name);
+  });
+  const select=$('englishVoice');
+  const previous=select.value || voicePreference;
+  select.replaceChildren();
+  const auto=new Option('Automática — inglés de Estados Unidos','');
+  select.add(auto);
+  englishVoices.forEach((v,i)=>{
+    select.add(new Option(`${v.name} (${v.lang})${v.localService?' · instalada':''}`,String(i)));
+  });
+  const selected=englishVoices.findIndex(v=>(v.voiceURI+'|'+v.lang+'|'+v.name)===previous);
+  if(selected>=0)select.value=String(selected);
+  else select.value='';
+  $('voiceInfo').textContent=englishVoices.length
+    ?`${englishVoices.length} ${englishVoices.length===1?'voz disponible':'voces disponibles'} en este dispositivo. Elige una y pulsa «Escuchar pregunta» para probarla.`
+    :'Las voces todavía no aparecen. «Escuchar pregunta» intentará utilizar la voz predeterminada. Comprueba las voces de inglés de tu sistema.';
+}
+$('englishVoice').addEventListener('change',()=>{
+  const selected=englishVoices[Number($('englishVoice').value)];
+  voicePreference=$('englishVoice').value!=='' && selected ? selected.voiceURI+'|'+selected.lang+'|'+selected.name : '';
+  try { localStorage.setItem(VOICE_PREF_KEY,voicePreference); } catch(e) { /* Memoria no disponible. */ }
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
+});
+if('speechSynthesis' in window){
+  populateVoices();
+  window.speechSynthesis.addEventListener('voiceschanged',populateVoices);
+}
 function speak(txt,slow=false){
   stopRecognition(true);
   if(!('speechSynthesis' in window)) {$('feedback').textContent='Este navegador no ofrece lectura en voz alta. Prueba con Chrome o Samsung Internet.';return;}
@@ -236,8 +289,12 @@ function speak(txt,slow=false){
     utter.lang='en-US';
     utter.rate=slow ? 0.73 : 0.91;
     const voices=synth.getVoices();
-    const voice=voices.find(v=>v.lang.toLowerCase()==='en-us')||voices.find(v=>v.lang.toLowerCase().startsWith('en'));
-    if(voice) utter.voice=voice;
+    const chosen=$('englishVoice').value;
+    let voice=chosen!=='' ? englishVoices[Number(chosen)] : null;
+    // La lista puede cambiar entre cargar la página y reproducir la voz.
+    if(voice)voice=voices.find(v=>v.voiceURI===voice.voiceURI && v.lang===voice.lang && v.name===voice.name)||voice;
+    if(!voice)voice=voices.find(v=>/^en[-_]US$/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang));
+    if(voice){utter.voice=voice;utter.lang=voice.lang||'en-US';}
     utter.onerror=ev=> { if(ev.error!=='interrupted'&&ev.error!=='canceled') $('feedback').textContent='No se pudo reproducir la voz. Revisa la configuración de texto a voz de Android.'; };
     synth.speak(utter);
   } catch(e) { $('feedback').textContent='No se pudo iniciar la voz en este navegador.'; }
