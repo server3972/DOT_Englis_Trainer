@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0c1727">
+<title>DOT English Trainer — Android v2.1 · navegación mejorada</title>
+<style>
+:root { color-scheme:dark; --bg:#081322; --panel:#122237; --panel2:#182c45; --line:#2d425a; --teal:#5bddc4; --light:#f2f6fd; --muted:#b6c9de; --gold:#f2c879; --green:#90e0b4; }
+* {box-sizing:border-box}
+html {scroll-behavior:smooth}
+body {font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; background:linear-gradient(160deg,#0c1a2d,var(--bg) 48%); color:var(--light); margin:0; min-height:100vh}
+.wrap {max-width:750px; margin:auto; padding:18px 14px 50px}
+header {display:flex; align-items:center; gap:13px; padding:8px 3px 14px}
+.emblem {display:grid; place-items:center; border-radius:16px; width:58px; height:58px; background:#17364a; color:var(--teal); font-weight:900; font-size:24px; border:1px solid #306176}
+h1 {font-size:24px; line-height:1.1; margin:0; letter-spacing:-0.5px}
+.subtitle {font-size:13px; color:var(--muted); margin-top:5px}
+.panel {background:var(--panel); border:1px solid var(--line); border-radius:17px; padding:18px; margin:13px 0; box-shadow:0 8px 24px #0002}
+.meta {display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; color:var(--muted); font-size:13px; font-weight:700; letter-spacing:.4px}
+.pill {display:inline-block; color:var(--teal); background:#17423e; border-radius:50px; padding:5px 12px; font-weight:800}
+.question {font-size:clamp(25px,6vw,36px); line-height:1.22; font-weight:800; letter-spacing:-.7px; margin:24px 0 15px}
+.translation {font-size:18px; color:var(--muted); margin:0 0 24px; border-left:3px solid var(--teal); padding-left:13px}
+button, select, textarea, input {font:inherit}
+button {appearance:none; border:1px solid var(--line); background:var(--panel2); color:var(--light); border-radius:13px; font-weight:700; padding:13px 16px; min-height:48px; cursor:pointer; touch-action:manipulation}
+button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible {outline:3px solid var(--teal); outline-offset:2px}
+button:active {transform:scale(.99)}
+button.primary {background:var(--teal); color:#08221e; border-color:transparent}
+button.secondary {background:#23435b}
+button.ghost {background:transparent}
+button:disabled {opacity:.4}
+.buttonrow {display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:10px 0}
+.buttonrow.one {grid-template-columns:1fr}
+.actionbar {display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.actionbar button {flex:1}
+label {display:block; font-size:13px; font-weight:750; color:var(--muted); margin:12px 0 6px}
+select,input,textarea {width:100%; border:1px solid #466077; border-radius:12px; color:var(--light); background:#0e1d2e; padding:12px; font-size:16px}
+textarea {resize:vertical; min-height:90px}
+small,.small {font-size:13px; color:var(--muted)}
+hr {border:0; border-top:1px solid var(--line); margin:19px 0}
+#answerbox {border-radius:13px; background:#0e2634; border:1px solid #2e5965; padding:13px; margin:13px 0}
+#answerEn {font-size:21px; line-height:1.36; font-weight:750; margin:3px 0 10px}
+#answerEs {color:var(--muted); margin:0}
+#tip {color:var(--gold); font-size:14px; margin:12px 0 0}
+#feedback {color:var(--gold); font-size:14px; min-height:21px; margin-top:10px}
+.progress {height:8px; overflow:hidden; border-radius:20px; background:#26374a; margin:12px 0 0}
+.progress>div {height:100%; width:0; background:var(--teal); transition:width .2s}
+summary {cursor:pointer; font-weight:800; font-size:17px; padding:4px 0; min-height:32px}
+.profile {display:grid; grid-template-columns:1fr 1fr; gap:0 12px}
+.footer {text-align:center; color:var(--muted); font-size:13px; margin:22px 0}
+.notice {font-size:13px; color:var(--muted)}
+.jumpgrid {display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.jumpgrid label {margin-top:3px}
+.jumpgrid input {max-width:170px}
+#navHint {padding:10px 12px;border:1px solid #395b6e;background:#112b3e;border-radius:10px;font-size:13px;color:#cfebf7;margin-top:10px}
+#resume:disabled {opacity:.45}
+.offline {color:var(--green);font-size:12px;font-weight:700}
+#micStatus {margin:5px 0 13px; padding:10px 12px; border:1px solid #3d536a; background:#132a40; border-radius:10px; font-size:13px; color:var(--muted)}
+#micStatus[data-mode="live"] {color:var(--green); border-color:#2c826e; background:#11382f}
+#micStatus[data-mode="error"] {color:#ffcc9d; border-color:#83563b}
+button.listening {background:#8e3030; border-color:#b45c5c; color:#fff}
+[hidden] {display:none !important}
+@media(max-width:380px) {.profile {grid-template-columns:1fr} button{padding:12px 9px} h1{font-size:21px} .panel{padding:14px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header>
+<div class="emblem" aria-hidden="true">DOT</div>
+<div><h1>English Trainer</h1><div class="subtitle">Inglés para operadores de tractocamión · v2.1 Android · micrófono y regresar a tu pregunta</div></div>
+</header>
+<section class="panel">
+<div class="meta"><span id="stats" aria-live="polite">51 preguntas para practicar</span><span class="pill">EN / ES</span></div>
+<div class="progress" aria-label="Progreso de práctica"><div id="progress"></div></div>
+<label for="category">Categoría</label>
+<select id="category"><option value="">Todas las categorías</option></select>
+<div class="jumpgrid" style="margin-top:15px"><div><label for="jumpNumber">Ir directamente a una pregunta (1–51)</label><input id="jumpNumber" type="number" min="1" max="51" inputmode="numeric" value="1" aria-label="Número de pregunta del uno al cincuenta y uno"></div><button type="button" id="jump" class="secondary">Ir a pregunta</button></div>
+<div class="meta" style="margin-top:18px"><span id="currentCategory">INSPECCIÓN</span><span id="counter">1 / 51</span></div>
+<div id="question" class="question">Good morning. How are you today?</div>
+<p class="translation" id="translation">Buenos días. ¿Cómo está hoy?</p>
+<div class="buttonrow">
+<button type="button" id="listen" class="primary">▶ Escuchar pregunta</button>
+<button type="button" id="slow">◀ Voz lenta</button>
+</div>
+<label for="typed">Escribe tu respuesta en inglés</label>
+<textarea id="typed" autocapitalize="sentences" spellcheck="false" placeholder="Ejemplo: Good morning, officer..."></textarea>
+<div class="buttonrow">
+<button id="microphone" type="button" class="secondary" aria-pressed="false">🎤 Hablar en inglés</button>
+<button id="keyboardMic" type="button">🎙 Dictado del teclado</button>
+</div>
+<div id="micStatus" data-mode="idle" role="status" aria-live="polite">Pulsa «Hablar en inglés», acepta el permiso del micrófono y responde. Tu respuesta aparecerá arriba para compararla.</div>
+<div class="buttonrow">
+<button id="compare" type="button" class="secondary">Comparar texto</button>
+<button id="reveal" type="button">Mostrar respuesta</button>
+</div>
+<div id="answerbox" hidden>
+<div class="small">RESPUESTA DE EJEMPLO</div>
+<p id="answerEn"></p>
+<p id="answerEs"></p>
+<p id="tip"></p>
+<div class="buttonrow one"><button type="button" id="listenAnswer">▶ Escuchar respuesta</button></div>
+</div>
+<div id="feedback" role="status" aria-live="polite"></div>
+<div class="buttonrow one"><button type="button" id="mark">✓ Marcar como practicada</button></div>
+<hr>
+<div class="buttonrow"><button type="button" id="prev">← Anterior</button><button type="button" id="next" class="primary">Siguiente →</button></div>
+<div class="buttonrow"><button type="button" id="random" class="ghost">🎲 Pregunta aleatoria</button><button type="button" id="resume" class="secondary" disabled>↩ Volver donde iba</button></div>
+<div id="navHint" role="status" aria-live="polite">Las preguntas van en orden. Si eliges una aleatoria, «Siguiente» retomará tu secuencia.</div>
+</section>
+<section class="panel">
+<details id="settings">
+<summary>⚙ Datos de mi viaje</summary>
+<p class="small">Personaliza las respuestas. Son opcionales y no se envían a ningún servidor.</p>
+<div class="profile">
+<div><label for="origin">Origen</label><input id="origin" placeholder="Nogales, Arizona"></div>
+<div><label for="destination">Destino</label><input id="destination" placeholder="Phoenix, Arizona"></div>
+<div><label for="company">Compañía</label><input id="company" placeholder="Mi empresa"></div>
+<div><label for="cargo">Carga</label><input id="cargo" placeholder="Produce"></div>
+<div><label for="hours">Horas manejadas</label><input id="hours" placeholder="Five hours"></div>
+</div>
+<button type="button" id="saveSettings" class="secondary" style="margin-top:16px;width:100%">Guardar datos</button>
+</details>
+</section>
+<section class="panel">
+<details>
+<summary>Ayuda y progreso</summary>
+<p class="notice">Las 51 preguntas y traducciones funcionan sin internet una vez guardado este archivo. El reconocimiento por micrófono puede necesitar internet y permisos del navegador. Para escuchar, Android necesita una voz de inglés disponible en su motor de texto a voz; la primera vez quizá requiera descargarla. El guardado depende de que tu navegador permita almacenamiento local para archivos abiertos desde Descargas.</p>
+<p class="notice"><strong>Micrófono en Samsung:</strong> abre Ajustes del teléfono → Aplicaciones → Chrome → Permisos → Micrófono → Permitir mientras se usa la aplicación. Después abre Chrome → ⋮ → Configuración → Configuración de sitios → Micrófono → permitir que los sitios soliciten acceso. Aunque ambos permisos estén activados, Chrome puede bloquear el reconocimiento automático si abriste el archivo <code>.html</code> desde Descargas. Para la función de voz automática, lo más fiable es publicar esta página en una dirección <code>https://</code> (por ejemplo, GitHub Pages). Alternativa inmediata: «Dictado del teclado» y micrófono de Samsung/Gboard, con idioma inglés.</p>
+<p class="notice"><strong>Navegación:</strong> «Ir a pregunta» te lleva directo a la pregunta por su número original (1–51). «Pregunta aleatoria» es un desvío temporal: «Siguiente» retoma la pregunta que tocaba estudiar; «Volver donde iba» regresa exactamente a la pregunta anterior al salto. El programa intenta recordar tu punto de estudio, pero el guardado local depende del navegador.</p>
+<p class="notice"><strong>Privacidad:</strong> El botón «Hablar en inglés» pide permiso para usar el micrófono. Según el navegador, el audio puede procesarse en un servicio externo. Esta página no guarda grabaciones de audio ni las envía por su cuenta. El texto reconocido se coloca en el cuadro de respuesta.</p>
+<p class="notice">La comparación mide similitud con una respuesta de ejemplo. <strong>No evalúa acento, pronunciación, reglas DOT ni si la respuesta es correcta para tu situación.</strong> Puedes dar una respuesta correcta muy distinta del ejemplo.</p>
+<div class="buttonrow"><button type="button" id="export">Exportar progreso</button><button type="button" id="reset">Reiniciar progreso</button></div>
+</details>
+</section>
+<div class="footer"><span class="offline">● Ejercicios sin conexión; voz por micrófono según navegador y red</span><p>Práctica educativa; no sustituye las indicaciones del oficial DOT.</p></div>
+</main>
+<script>
+"use strict";
+const QUESTIONS = [{"id": 0, "category": "Inicio de inspección", "en": "Good morning. How are you today?", "es": "Buenos días. ¿Cómo está hoy?", "answer": "Good morning, officer. I'm doing well, thank you.", "answer_es": "Buenos días, oficial. Estoy bien, gracias.", "tip": "Un saludo claro y tranquilo ayuda a iniciar la conversación."}, {"id": 1, "category": "Inicio de inspección", "en": "Do you speak English?", "es": "¿Habla inglés?", "answer": "Yes, I speak some English. Please speak slowly.", "answer_es": "Sí, hablo algo de inglés. Por favor, hable despacio.", "tip": "Responde según tu nivel real; no memorices una afirmación que no sea cierta."}, {"id": 2, "category": "Inicio de inspección", "en": "Can you understand me?", "es": "¿Puede entenderme?", "answer": "I understand. Could you repeat that, please?", "answer_es": "Entiendo. ¿Podría repetirlo, por favor?", "tip": "Si no entendiste, pide que repitan la pregunta."}, {"id": 3, "category": "Inicio de inspección", "en": "What is your name?", "es": "¿Cómo se llama?", "answer": "My name is [your name].", "answer_es": "Me llamo [tu nombre].", "tip": "Sustituye los corchetes por tu información real."}, {"id": 4, "category": "Inicio de inspección", "en": "Who do you work for?", "es": "¿Para qué empresa trabaja?", "answer": "I work for {company}.", "answer_es": "Trabajo para {company_es}.", "tip": "Puedes indicar tu empresa en la sección Datos del viaje."}, {"id": 5, "category": "Inicio de inspección", "en": "Is this your truck?", "es": "¿Este camión es suyo?", "answer": "This truck belongs to my company.", "answer_es": "Este camión pertenece a mi empresa.", "tip": "Modifica la respuesta si el vehículo es tuyo."}, {"id": 6, "category": "Inicio de inspección", "en": "Why did you stop here?", "es": "¿Por qué se detuvo aquí?", "answer": "I stopped here for a required rest break.", "answer_es": "Me detuve aquí para un descanso obligatorio.", "tip": "Solo usa esa respuesta si corresponde a lo que ocurrió."}, {"id": 7, "category": "Inicio de inspección", "en": "Please step out of the truck.", "es": "Por favor, salga del camión.", "answer": "Yes, officer. I'll step out now.", "answer_es": "Sí, oficial. Voy a salir ahora.", "tip": "Esta es una instrucción, no una pregunta; demuestra que la comprendiste."}, {"id": 8, "category": "Ruta y carga", "en": "Where are you coming from?", "es": "¿De dónde viene?", "answer": "I'm coming from {origin}.", "answer_es": "Vengo de {origin_es}.", "tip": "Di tu punto de origen verdadero."}, {"id": 9, "category": "Ruta y carga", "en": "Where are you going?", "es": "¿A dónde va?", "answer": "I'm going to {destination}.", "answer_es": "Voy a {destination_es}.", "tip": "Practica nombres de ciudades y estados en inglés."}, {"id": 10, "category": "Ruta y carga", "en": "What is your destination?", "es": "¿Cuál es su destino?", "answer": "My destination is {destination}.", "answer_es": "Mi destino es {destination_es}.", "tip": "Destination = destino."}, {"id": 11, "category": "Ruta y carga", "en": "What are you hauling?", "es": "¿Qué carga transporta?", "answer": "I'm hauling {cargo}.", "answer_es": "Transporto {cargo_es}.", "tip": "Hauling = transportando carga."}, {"id": 12, "category": "Ruta y carga", "en": "Where did you pick up this load?", "es": "¿Dónde recogió esta carga?", "answer": "I picked up this load in {origin}.", "answer_es": "Recogí esta carga en {origin_es}.", "tip": "Pick up = recoger; load = carga."}, {"id": 13, "category": "Ruta y carga", "en": "Where will you deliver this load?", "es": "¿Dónde entregará esta carga?", "answer": "I'll deliver this load in {destination}.", "answer_es": "Entregaré esta carga en {destination_es}.", "tip": "Deliver = entregar."}, {"id": 14, "category": "Ruta y carga", "en": "Is your trailer loaded or empty?", "es": "¿Su remolque está cargado o vacío?", "answer": "My trailer is loaded.", "answer_es": "Mi remolque está cargado.", "tip": "Si está vacío responde: My trailer is empty."}, {"id": 15, "category": "Ruta y carga", "en": "Is this a local or an interstate trip?", "es": "¿Es un viaje local o entre estados?", "answer": "This is an interstate trip.", "answer_es": "Este es un viaje entre estados.", "tip": "Usa local trip si es local. Interstate = entre estados."}, {"id": 16, "category": "Documentos y ELD", "en": "May I see your commercial driver's license?", "es": "¿Puedo ver su licencia comercial de conducir?", "answer": "Yes, officer. Here is my CDL.", "answer_es": "Sí, oficial. Aquí está mi licencia comercial (CDL).", "tip": "CDL = Commercial Driver's License."}, {"id": 17, "category": "Documentos y ELD", "en": "Can I see your registration and insurance?", "es": "¿Puedo ver su registro y seguro?", "answer": "Of course. Here are the documents.", "answer_es": "Por supuesto. Aquí están los documentos.", "tip": "Registration = registro; insurance = seguro."}, {"id": 18, "category": "Documentos y ELD", "en": "Do you have the bill of lading?", "es": "¿Tiene el documento de embarque?", "answer": "Yes. Here is the bill of lading.", "answer_es": "Sí. Aquí está el documento de embarque.", "tip": "Bill of lading se suele abreviar BOL. Responde según lo que realmente tengas."}, {"id": 19, "category": "Documentos y ELD", "en": "Can you show me your electronic logs?", "es": "¿Puede mostrarme sus registros electrónicos?", "answer": "Yes. I can show you my ELD records.", "answer_es": "Sí. Puedo mostrarle mis registros del ELD.", "tip": "ELD = Electronic Logging Device."}, {"id": 20, "category": "Documentos y ELD", "en": "Which electronic logging device do you use?", "es": "¿Qué dispositivo de registro electrónico utiliza?", "answer": "I use Samsara for my electronic logs.", "answer_es": "Uso Samsara para mis registros electrónicos.", "tip": "Cambia la marca si usas otro dispositivo."}, {"id": 21, "category": "Documentos y ELD", "en": "How many hours have you driven today?", "es": "¿Cuántas horas ha manejado hoy?", "answer": "I've driven {hours} today.", "answer_es": "Hoy he manejado {hours_es}.", "tip": "Revisa tu registro real antes de contestar."}, {"id": 22, "category": "Documentos y ELD", "en": "When did you start your shift?", "es": "¿Cuándo comenzó su turno?", "answer": "I started my shift at six this morning.", "answer_es": "Comencé mi turno a las seis de la mañana.", "tip": "La hora es solo un ejemplo; contesta con la hora real."}, {"id": 23, "category": "Documentos y ELD", "en": "When was your last rest break?", "es": "¿Cuándo fue su último descanso?", "answer": "My last rest break was two hours ago.", "answer_es": "Mi último descanso fue hace dos horas.", "tip": "Es una muestra; consulta tus registros para una respuesta exacta."}, {"id": 24, "category": "Documentos y ELD", "en": "Please transfer your ELD records.", "es": "Por favor, transfiera sus registros del ELD.", "answer": "I understand. I'll follow the ELD transfer instructions.", "answer_es": "Entiendo. Seguiré las instrucciones para transferir los registros del ELD.", "tip": "Sigue el procedimiento de tu ELD y las instrucciones del inspector."}, {"id": 25, "category": "Vehículo y seguridad", "en": "Did you perform a pre-trip inspection?", "es": "¿Realizó una inspección antes del viaje?", "answer": "Yes, I performed my pre-trip inspection.", "answer_es": "Sí, realicé mi inspección antes del viaje.", "tip": "Responde que sí únicamente si de verdad la realizaste."}, {"id": 26, "category": "Vehículo y seguridad", "en": "Are your brakes working properly?", "es": "¿Sus frenos funcionan correctamente?", "answer": "I haven't noticed a problem with the brakes.", "answer_es": "No he notado ningún problema con los frenos.", "tip": "No ocultes defectos. Describe cualquier falla de manera precisa."}, {"id": 27, "category": "Vehículo y seguridad", "en": "Do you have any mechanical problems?", "es": "¿Tiene algún problema mecánico?", "answer": "I need to report a problem with my truck.", "answer_es": "Necesito reportar un problema con mi camión.", "tip": "Practica tanto cómo reportar una falla como cómo informar que no has detectado fallas."}, {"id": 28, "category": "Vehículo y seguridad", "en": "Can you turn on your headlights?", "es": "¿Puede encender las luces delanteras?", "answer": "Yes, officer. I'll turn on the headlights.", "answer_es": "Sí, oficial. Voy a encender las luces delanteras.", "tip": "Headlights = luces delanteras."}, {"id": 29, "category": "Vehículo y seguridad", "en": "Please turn on your left turn signal.", "es": "Por favor, encienda la direccional izquierda.", "answer": "I'll turn on the left turn signal.", "answer_es": "Voy a encender la direccional izquierda.", "tip": "Left = izquierda; right = derecha."}, {"id": 30, "category": "Vehículo y seguridad", "en": "Please apply the brakes.", "es": "Por favor, aplique los frenos.", "answer": "Yes, officer. I'm applying the brakes now.", "answer_es": "Sí, oficial. Estoy aplicando los frenos ahora.", "tip": "Apply the brakes = pisar o aplicar los frenos."}, {"id": 31, "category": "Vehículo y seguridad", "en": "Do you have warning triangles?", "es": "¿Tiene triángulos de advertencia?", "answer": "Yes, I have warning triangles in the truck.", "answer_es": "Sí, tengo triángulos de advertencia en el camión.", "tip": "Solo da esta respuesta si llevas los triángulos."}, {"id": 32, "category": "Vehículo y seguridad", "en": "Is the load properly secured?", "es": "¿La carga está asegurada correctamente?", "answer": "I checked the load securement before leaving.", "answer_es": "Revisé la sujeción de la carga antes de salir.", "tip": "Una revisión previa no garantiza que todo esté correcto ahora."}, {"id": 33, "category": "Vehículo y seguridad", "en": "Please open the hood.", "es": "Por favor, abra el cofre.", "answer": "Yes, officer. I'll open the hood.", "answer_es": "Sí, oficial. Voy a abrir el cofre.", "tip": "Hood (Estados Unidos) = cofre o capó."}, {"id": 34, "category": "Señales y órdenes", "en": "What does STOP mean?", "es": "¿Qué significa STOP?", "answer": "It means I must come to a complete stop.", "answer_es": "Significa que debo detenerme por completo.", "tip": "Come to a complete stop = detenerse totalmente."}, {"id": 35, "category": "Señales y órdenes", "en": "What does NO TRUCKS mean?", "es": "¿Qué significa NO TRUCKS?", "answer": "Trucks are not allowed on that road.", "answer_es": "No se permiten camiones en esa carretera.", "tip": "Es importante reconocer señales escritas en inglés."}, {"id": 36, "category": "Señales y órdenes", "en": "What does LOW CLEARANCE mean?", "es": "¿Qué significa LOW CLEARANCE?", "answer": "It means there is limited height clearance ahead.", "answer_es": "Significa que hay poca altura libre más adelante.", "tip": "Antes de continuar, verifica la altura indicada y la de tu unidad."}, {"id": 37, "category": "Señales y órdenes", "en": "What does WEIGH STATION OPEN mean?", "es": "¿Qué significa WEIGH STATION OPEN?", "answer": "It means the weigh station is open.", "answer_es": "Significa que la estación de pesaje está abierta.", "tip": "Sigue las señales y las instrucciones aplicables para entrar."}, {"id": 38, "category": "Señales y órdenes", "en": "What does BRIDGE ICES BEFORE ROAD mean?", "es": "¿Qué significa BRIDGE ICES BEFORE ROAD?", "answer": "The bridge may freeze before the road does.", "answer_es": "El puente puede congelarse antes que la carretera.", "tip": "Bridge = puente; ice = congelarse."}, {"id": 39, "category": "Señales y órdenes", "en": "Please pull over to the right.", "es": "Por favor, oríllese a la derecha.", "answer": "I understand. I'll pull over safely.", "answer_es": "Entiendo. Me orillaré con seguridad.", "tip": "Pull over = orillarse o detenerse a un lado."}, {"id": 40, "category": "Señales y órdenes", "en": "Follow the signs to the inspection area.", "es": "Siga las señales hacia el área de inspección.", "answer": "I understand. I'll follow the signs.", "answer_es": "Entiendo. Seguiré las señales.", "tip": "Inspection area = área de inspección."}, {"id": 41, "category": "Señales y órdenes", "en": "Please move your truck to the inspection bay.", "es": "Por favor, mueva su camión al área de inspección.", "answer": "Yes, officer. I'll move the truck there.", "answer_es": "Sí, oficial. Moveré el camión hacia allá.", "tip": "Inspection bay = zona o bahía de inspección."}, {"id": 42, "category": "Señales y órdenes", "en": "What does ROAD CLOSED AHEAD mean?", "es": "¿Qué significa ROAD CLOSED AHEAD?", "answer": "It means the road is closed farther ahead.", "answer_es": "Significa que la carretera está cerrada más adelante.", "tip": "Closed = cerrado; ahead = más adelante."}, {"id": 43, "category": "Problemas y aclaraciones", "en": "Could you speak more slowly, please?", "es": "¿Podría hablar más despacio, por favor?", "answer": "Of course. I will listen carefully.", "answer_es": "Por supuesto. Escucharé con atención.", "tip": "Esta frase también sirve como pregunta que tú puedes hacer."}, {"id": 44, "category": "Problemas y aclaraciones", "en": "I didn't understand the last question.", "es": "No entendí la última pregunta.", "answer": "Could you repeat the question, please?", "answer_es": "¿Podría repetir la pregunta, por favor?", "tip": "Pedir aclaración es mejor que adivinar."}, {"id": 45, "category": "Problemas y aclaraciones", "en": "There is a problem with my tire.", "es": "Hay un problema con mi llanta.", "answer": "I need help checking the tire safely.", "answer_es": "Necesito ayuda para revisar la llanta con seguridad.", "tip": "Tire = llanta; flat tire = llanta ponchada."}, {"id": 46, "category": "Problemas y aclaraciones", "en": "My truck has a warning light on.", "es": "Mi camión tiene una luz de advertencia encendida.", "answer": "I need to identify the warning before driving.", "answer_es": "Necesito identificar la advertencia antes de conducir.", "tip": "Warning light = luz de advertencia."}, {"id": 47, "category": "Problemas y aclaraciones", "en": "I need a safe place to stop.", "es": "Necesito un lugar seguro para detenerme.", "answer": "Is there a safe place to park nearby?", "answer_es": "¿Hay un lugar seguro para estacionar cerca?", "tip": "Nearby = cerca."}, {"id": 48, "category": "Problemas y aclaraciones", "en": "Do you need medical assistance?", "es": "¿Necesita asistencia médica?", "answer": "Yes, I need medical assistance, please.", "answer_es": "Sí, necesito asistencia médica, por favor.", "tip": "En una emergencia, contesta con la verdad y solicita ayuda inmediata."}, {"id": 49, "category": "Problemas y aclaraciones", "en": "Can you explain what happened?", "es": "¿Puede explicar lo que pasó?", "answer": "I'll explain what happened as clearly as I can.", "answer_es": "Explicaré lo sucedido tan claramente como pueda.", "tip": "Después describe solo hechos que conozcas."}, {"id": 50, "category": "Problemas y aclaraciones", "en": "Can you repeat the instructions?", "es": "¿Puede repetir las instrucciones?", "answer": "Yes. I will repeat what I understood.", "answer_es": "Sí. Repetiré lo que entendí.", "tip": "Practica reformular instrucciones con tus propias palabras."}];
+const KEY = 'dot_english_trainer_android_v1'; // Mismo almacenamiento que v1/v2: conserva progreso cuando el navegador mantiene el mismo origen.
+const $ = id=>document.getElementById(id);
+let storeOK=true;
+let state={reviewed:[], attempts:0, settings:{}};
+try {
+  const restored=JSON.parse(localStorage.getItem(KEY) || 'null');
+  if(restored && typeof restored==='object') {
+    state.reviewed=Array.isArray(restored.reviewed) ? restored.reviewed.filter(x=>Number.isInteger(x)&&x>=0&&x<QUESTIONS.length) : [];
+    state.attempts=Number.isInteger(restored.attempts) ? restored.attempts : 0;
+    state.settings=restored.settings && typeof restored.settings==='object' ? restored.settings : {};
+    if(Number.isInteger(restored.sequentialId) && restored.sequentialId>=0 && restored.sequentialId<QUESTIONS.length) state.sequentialId=restored.sequentialId;
+  }
+} catch(e){storeOK=false;}
+let queue=QUESTIONS.map(q=>q.id), position=Number.isInteger(state.sequentialId) ? state.sequentialId : 0, showing=false;
+let randomActive=false, lastSequentialId=queue[position];
+const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognizer=null, micSession=0, micHeardResult=false, micHasError=false;
+const fields=['origin','destination','company','cargo','hours'];
+const placeholders={origin:'[your origin]', destination:'[your destination]',company:'[your company]',cargo:'[your cargo]',hours:'[your hours]'};
+const placeholdersEs={origin:'[tu origen]',destination:'[tu destino]',company:'[tu empresa]',cargo:'[tu carga]',hours:'[tus horas]'};
+function filled(txt) {
+  return txt.replace(/\{(origin|destination|company|cargo|hours)(_es)?\}/g,(match,field,es)=>{
+    const v=(state.settings[field]||'').trim();
+    return v || (es ? placeholdersEs[field] : placeholders[field]);
+  });
+}
+function save() {
+  try {localStorage.setItem(KEY, JSON.stringify(state));storeOK=true;return true;}
+  catch(e) {storeOK=false;return false;}
+}
+function active(){return QUESTIONS[queue[position]];}
+function stats() {
+  $('stats').textContent=`${state.reviewed.length}/${QUESTIONS.length} practicadas · ${state.attempts} comparaciones`;
+  $('progress').style.width = `${100*state.reviewed.length/QUESTIONS.length}%`;
+  $('mark').textContent=state.reviewed.includes(active().id) ? '✓ Ya practicada' : '✓ Marcar como practicada';
+}
+function render() {
+  stopRecognition(true);
+  const q=active();
+  if(!q)return;
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  $('currentCategory').textContent=q.category.toUpperCase();
+  $('counter').textContent=`Pregunta ${q.id+1} / ${QUESTIONS.length}${queue.length!==QUESTIONS.length?' · categoría '+(position+1)+'/'+queue.length:''}`;
+  $('jumpNumber').value=String(q.id+1);
+  $('resume').disabled=!randomActive;
+  if(randomActive){
+    const originalIndex=queue.indexOf(lastSequentialId);
+    const nextIndex=(originalIndex>=0 ? (originalIndex+1)%queue.length : 0);
+    $('navHint').textContent=`Estás en una pregunta ALEATORIA (#${q.id+1}). «Siguiente» vuelve a tu secuencia en la pregunta #${QUESTIONS[queue[nextIndex]].id+1}; «Volver donde iba» regresa a la #${lastSequentialId+1}.`;
+  }else{
+    $('navHint').textContent=`Estás estudiando en orden la pregunta #${q.id+1}. Puedes saltar a otra con «Ir a pregunta» o probar una aleatoria sin perder tu lugar.`;
+  }
+  $('question').textContent=q.en;
+  $('translation').textContent=q.es;
+  $('typed').value='';
+  $('feedback').textContent='Escucha la pregunta, responde y compara tu texto.';
+  showing=false;
+  showAnswer();
+  stats();
+}
+function goSequential(index){
+  if(!queue.length)return;
+  position=(index+queue.length)%queue.length;
+  randomActive=false;
+  lastSequentialId=queue[position];
+  state.sequentialId=lastSequentialId;
+  save();
+  render();
+}
+function goNumber(){
+  const raw=$('jumpNumber').value.trim();
+  const num=Number(raw);
+  if(!raw || !Number.isInteger(num) || num<1 || num>QUESTIONS.length){
+    $('feedback').textContent='Elige un número entero del 1 al '+QUESTIONS.length+'.';
+    return;
+  }
+  $('category').value='';
+  queue=QUESTIONS.map(q=>q.id);
+  goSequential(num-1);
+}
+function showAnswer() {
+  const q=active();
+  $('answerbox').hidden=!showing;
+  $('reveal').textContent=showing?'Ocultar respuesta':'Mostrar respuesta';
+  if(showing) {
+    $('answerEn').textContent=filled(q.answer);
+    $('answerEs').textContent=filled(q.answer_es);
+    $('tip').textContent='Consejo: '+q.tip;
+  }
+}
+function speak(txt,slow=false){
+  stopRecognition(true);
+  if(!('speechSynthesis' in window)) {$('feedback').textContent='Este navegador no ofrece lectura en voz alta. Prueba con Chrome o Samsung Internet.';return;}
+  try {
+    const synth=window.speechSynthesis;
+    synth.cancel();
+    const utter=new SpeechSynthesisUtterance(txt);
+    utter.lang='en-US';
+    utter.rate=slow ? 0.73 : 0.91;
+    const voices=synth.getVoices();
+    const voice=voices.find(v=>v.lang.toLowerCase()==='en-us')||voices.find(v=>v.lang.toLowerCase().startsWith('en'));
+    if(voice) utter.voice=voice;
+    utter.onerror=ev=> { if(ev.error!=='interrupted'&&ev.error!=='canceled') $('feedback').textContent='No se pudo reproducir la voz. Revisa la configuración de texto a voz de Android.'; };
+    synth.speak(utter);
+  } catch(e) { $('feedback').textContent='No se pudo iniciar la voz en este navegador.'; }
+}
+function norm(str){return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim()}
+function similarity(a,b){
+ a=norm(a);b=norm(b);
+ if(!a||!b)return 0;
+ const v=Array.from({length:b.length+1},(_,i)=>i);
+ for(let i=1;i<=a.length;i++){
+   let prev=v[0];v[0]=i;
+   for(let j=1;j<=b.length;j++){
+     const old=v[j];v[j]=Math.min(v[j]+1,v[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=old;
+   }
+ }
+ return Math.round((1-v[b.length]/Math.max(a.length,b.length))*100);
+}
+// Reconocimiento opcional. Chrome/Samsung deben otorgar permiso; algunos navegadores
+// no permiten usarlo cuando el HTML se abre como archivo local (file://).
+function micMessage(message, mode='idle') {
+  $('micStatus').textContent=message;
+  $('micStatus').dataset.mode=mode;
+}
+function micButton(activeMic) {
+  $('microphone').textContent=activeMic?'■ Detener escucha':'🎤 Hablar en inglés';
+  $('microphone').classList.toggle('listening',activeMic);
+  $('microphone').setAttribute('aria-pressed',String(activeMic));
+}
+function stopRecognition(silent=false) {
+  const old=recognizer;
+  if(!old)return;
+  micSession++;
+  recognizer=null;
+  micButton(false);
+  if(silent) micMessage('Micrófono detenido. Puedes volver a practicar cuando quieras.');
+  try { old.abort(); } catch(e) { /* Ya estaba detenido. */ }
+}
+function micErrorText(code) {
+  switch(code) {
+    case 'not-allowed': case 'service-not-allowed':
+      return 'Se bloqueó el acceso a la voz. Revisa Ajustes de Samsung → Aplicaciones → Chrome → Permisos → Micrófono. En Chrome revisa Configuración de sitios → Micrófono. Si abriste un HTML de Descargas, es posible que solo funcione desde HTTPS; utiliza «Dictado del teclado» mientras tanto.';
+    case 'audio-capture': return 'No se encontró un micrófono disponible. Revisa los permisos y si otra aplicación lo está usando.';
+    case 'no-speech': return 'No se escuchó una respuesta. Pulsa otra vez y habla cerca del micrófono.';
+    case 'network': return 'El reconocimiento de voz necesita conexión o el servicio no respondió. Usa el dictado del teclado como alternativa.';
+    case 'language-not-supported': return 'El idioma inglés no está disponible para reconocimiento en este navegador.';
+    case 'aborted': return 'Se canceló la escucha. Puedes volver a intentarlo.';
+    case 'no-match': return 'No se pudo reconocer lo que dijiste. Inténtalo nuevamente.';
+    default: return 'El navegador no pudo reconocer la voz ('+(code||'error')+'). Prueba Chrome o el dictado del teclado.';
+  }
+}
+function compareAnswer(source='typed') {
+ const txt=$('typed').value.trim();
+ if(!txt){$('feedback').textContent='Primero escribe o dicta tu respuesta en inglés.';return false;}
+ const score=similarity(txt,filled(active().answer));state.attempts++;
+ showing=true;showAnswer();save();stats();
+ const note=score>=85?'Muy parecida al ejemplo.':score>=55?'Revisa las diferencias.':'Tu respuesta es distinta; podría ser válida según tu situación.';
+ const origin=source==='voice'?'de la respuesta transcrita':'del texto';
+ $('feedback').textContent=`Similitud ${origin}: ${score}%. ${note} Esto NO evalúa tu pronunciación.`;
+ return true;
+}
+$('microphone').addEventListener('click',()=>{
+ if(recognizer) {
+   micMessage('Terminando escucha y procesando lo que dijiste...', 'live');
+   try {recognizer.stop();} catch(e) {stopRecognition(true);}
+   return;
+ }
+ if(!SpeechRecognitionClass) {
+   micMessage('Este navegador no ofrece reconocimiento automático. Pulsa «Dictado del teclado» y usa el micrófono de Samsung o Gboard.', 'error');
+   return;
+ }
+ if(window.isSecureContext===false) {
+   micMessage('El archivo no tiene acceso seguro al micrófono. Para reconocimiento automático se necesita HTTPS; mientras tanto pulsa «Dictado del teclado».','error');
+   return;
+ }
+ if('speechSynthesis' in window) window.speechSynthesis.cancel();
+ const session=++micSession;
+ const questionId=active().id;
+ micHeardResult=false;micHasError=false;
+ let rec;
+ try {rec=new SpeechRecognitionClass();} catch(e) {micMessage('No fue posible iniciar el micrófono. Prueba el dictado del teclado.','error');return;}
+ recognizer=rec;
+ rec.lang='en-US';
+ rec.continuous=false;
+ rec.interimResults=false;
+ rec.maxAlternatives=1;
+ rec.onstart=()=>{
+   if(session!==micSession)return;
+   micButton(true);
+   micMessage('Escuchando... Di tu respuesta en INGLÉS. Puedes tocar «Detener escucha».','live');
+ };
+ rec.onresult=(event)=>{
+   if(session!==micSession || active().id!==questionId)return;
+   const parts=[];
+   for(let i=event.resultIndex||0;i<event.results.length;i++) {
+     const row=event.results[i];
+     if(row && row[0] && row[0].transcript && row.isFinal!==false) parts.push(row[0].transcript.trim());
+   }
+   const transcript=parts.join(' ').trim();
+   if(!transcript)return;
+   micHeardResult=true;
+   $('typed').value=transcript;
+   micMessage('Reconocí: «'+transcript+'». Puedes corregir el texto antes de volver a comparar.','idle');
+   compareAnswer('voice');
+ };
+ rec.onerror=(event)=>{
+   if(session!==micSession)return;
+   micHasError=true;
+   micMessage(micErrorText(event.error),'error');
+ };
+ rec.onend=()=>{
+   if(session!==micSession)return;
+   recognizer=null;
+   micButton(false);
+   if(!micHeardResult && !micHasError) micMessage('No recibí una respuesta. Intenta de nuevo o utiliza el dictado del teclado.','error');
+ };
+ micMessage('Solicitando permiso de micrófono...','live');
+ micButton(true);
+ try {rec.start();} catch(e) {
+   if(session===micSession) {
+     recognizer=null;
+     micButton(false);
+     micMessage('No se pudo iniciar el micrófono desde esta página. Abre por HTTPS o usa «Dictado del teclado».','error');
+   }
+ }
+});
+$('keyboardMic').addEventListener('click',()=>{
+ stopRecognition(false);
+ $('typed').focus();
+ micMessage('En el teclado Samsung o Gboard, pulsa SU micrófono y dicta en inglés (English US). Cuando aparezca el texto, pulsa «Comparar texto».','idle');
+});
+[...new Set(QUESTIONS.map(q=>q.category))].forEach(cat=>{
+ const opt=document.createElement('option');opt.value=cat;opt.textContent=cat;$('category').appendChild(opt);
+});
+fields.forEach(f=> {$ (f).value=state.settings[f]||'';});
+$('category').addEventListener('change',()=>{
+  const cat=$('category').value;
+  queue=QUESTIONS.filter(q=>!cat||q.category===cat).map(q=>q.id);
+  goSequential(0);
+});
+$('jump').addEventListener('click',goNumber);
+$('jumpNumber').addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();goNumber();}});
+$('listen').addEventListener('click',()=>speak(active().en));
+$('slow').addEventListener('click',()=>speak(active().en,true));
+$('listenAnswer').addEventListener('click',()=>speak(filled(active().answer)));
+$('reveal').addEventListener('click',()=>{showing=!showing;showAnswer();});
+$('next').addEventListener('click',()=>{
+  if(randomActive){
+    const i=queue.indexOf(lastSequentialId);
+    goSequential(i<0?0:i+1);
+  } else goSequential(position+1);
+});
+$('prev').addEventListener('click',()=>{
+  if(randomActive){
+    const i=queue.indexOf(lastSequentialId);
+    goSequential(i<0?0:i-1);
+  } else goSequential(position-1);
+});
+$('resume').addEventListener('click',()=>{
+  if(!randomActive)return;
+  const i=queue.indexOf(lastSequentialId);
+  goSequential(i<0?0:i);
+});
+$('random').addEventListener('click',()=>{
+  if(queue.length<=1)return;
+  if(!randomActive)lastSequentialId=queue[position];
+  let n;
+  do{n=Math.floor(Math.random()*queue.length)}while(n===position);
+  position=n;
+  randomActive=true;
+  render();
+});
+$('compare').addEventListener('click',()=>compareAnswer('typed'));
+$('mark').addEventListener('click',()=>{
+ if(!state.reviewed.includes(active().id))state.reviewed.push(active().id);
+ const ok=save();stats();$('feedback').textContent=ok?'Marcada como practicada. ¡Continúa con la siguiente!':'Marcada por ahora, pero el navegador no permite guardar el progreso.';
+});
+$('saveSettings').addEventListener('click',()=>{
+ fields.forEach(f=>state.settings[f]=$(f).value.trim());
+ const ok=save();if(showing)showAnswer();
+ $('feedback').textContent=ok?'Datos guardados en este navegador.':'Datos aplicados; el navegador no permitió guardarlos permanentemente.';
+ window.scrollTo({top:0,behavior:'smooth'});
+});
+$('reset').addEventListener('click',()=>{
+ if(!confirm('¿Borrar preguntas practicadas y comparaciones? Tus datos del viaje se conservarán.'))return;
+ state.reviewed=[];state.attempts=0;save();render();
+});
+$('export').addEventListener('click',()=>{
+ const blob=new Blob([JSON.stringify({app:'DOT English Trainer Android',...state,updated_at:new Date().toISOString()},null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');a.href=url;a.download='dot_english_progreso.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+});
+render();
+if(location.protocol==='file:') {
+ micMessage('Estás usando un archivo HTML desde Descargas. Escuchar preguntas funciona, pero «Hablar en inglés» puede estar restringido aquí aunque Chrome tenga permiso. Si falla, usa «Dictado del teclado» o abre el programa desde HTTPS.', 'idle');
+}
+</script>
+</body>
+</html>
